@@ -1,9 +1,0 @@
-# Crie a pasta
-mkdir -p ~/scripts
-
-# Crie cada arquivo
-nano ~/scripts/update.sh
-# Cole o código, salve (Ctrl+X, Y, Enter)
-
-#Tornar executaveis
-chmod +x ~/scripts/*.sh

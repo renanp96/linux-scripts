@@ -83,7 +83,7 @@ source ~/.bashrc
 Agora o script pode ser executado apenas com:
 
 ```bash
-.system-update.sh
+system-update.sh
 ```
 
 ---
