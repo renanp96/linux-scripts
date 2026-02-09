@@ -1,14 +1,13 @@
 #!/bin/bash
 
-echo "== Correcao automatica basica do sistema =="
-echo "Executar como root (sudo)"
-echo
-
+# Auto-elevacao para root
 if [[ $EUID -ne 0 ]]; then
-  echo "Execute com sudo"
-  exit 1
+  exec sudo "$0" "$@"
 fi
 
+echo "== Correcao automatica basica do sistema =="
+
+echo
 echo "1. Corrigindo pacotes quebrados..."
 apt --fix-broken install -y
 
@@ -27,7 +26,7 @@ echo "4. Atualizando lista de pacotes..."
 apt update
 
 echo
-echo "5. Reiniciando serviços problemáticos..."
+echo "5. Reiniciando servicos problemáticos..."
 systemctl daemon-reexec
 systemctl reset-failed
 
@@ -55,3 +54,4 @@ systemctl restart systemd-journald
 echo
 echo "== Correcao concluida =="
 echo "Reinicie o sistema se problemas persistirem."
+
