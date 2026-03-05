@@ -1,57 +1,91 @@
 #!/bin/bash
 
-# Auto-elevacao para root
+# Auto-elevação para root
 if [[ $EUID -ne 0 ]]; then
   exec sudo "$0" "$@"
 fi
 
-echo "== Correcao automatica basica do sistema =="
+# Cores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}====================================${NC}"
+echo -e "${BLUE}   Correção Automática do Sistema${NC}"
+echo -e "${BLUE}====================================${NC}"
 
 echo
-echo "1. Corrigindo pacotes quebrados..."
+echo -e "${YELLOW}1. Verificando espaço em disco...${NC}"
+df -h /
+
+echo
+echo -e "${YELLOW}2. Removendo locks do APT (se existirem)...${NC}"
+rm -f /var/lib/dpkg/lock
+rm -f /var/lib/dpkg/lock-frontend
+rm -f /var/cache/apt/archives/lock
+
+echo
+echo -e "${YELLOW}3. Corrigindo pacotes quebrados...${NC}"
 apt --fix-broken install -y
 
 echo
-echo "2. Reconfigurando pacotes pendentes..."
+echo -e "${YELLOW}4. Reconfigurando pacotes pendentes...${NC}"
 dpkg --configure -a
 
 echo
-echo "3. Limpando cache APT..."
+echo -e "${YELLOW}5. Limpando cache APT...${NC}"
 apt clean
 apt autoclean
 apt autoremove -y
 
 echo
-echo "4. Atualizando lista de pacotes..."
-apt update
+echo -e "${YELLOW}6. Verificando conexão de rede...${NC}"
+if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+  echo -e "${GREEN}Rede OK${NC}"
+  echo "Atualizando lista de pacotes..."
+  apt update
+else
+  echo -e "${RED}Sem conexão com internet${NC}"
+fi
 
 echo
-echo "5. Reiniciando servicos problemáticos..."
+echo -e "${YELLOW}7. Reiniciando serviços problemáticos...${NC}"
 systemctl daemon-reexec
 systemctl reset-failed
 
 echo
-echo "6. Corrigindo initramfs..."
+echo -e "${YELLOW}Serviços com falha:${NC}"
+systemctl --failed
+
+echo
+echo -e "${YELLOW}8. Corrigindo initramfs...${NC}"
 update-initramfs -u
 
 echo
-echo "7. Reiniciando stack de audio..."
+echo -e "${YELLOW}9. Reiniciando stack de áudio...${NC}"
 if systemctl --user is-active pipewire >/dev/null 2>&1; then
   systemctl --user restart pipewire pipewire-pulse wireplumber
-  echo "PipeWire reiniciado"
+  echo -e "${GREEN}PipeWire reiniciado${NC}"
 elif systemctl --user is-active pulseaudio >/dev/null 2>&1; then
   pulseaudio -k
-  echo "PulseAudio reiniciado"
+  echo -e "${GREEN}PulseAudio reiniciado${NC}"
 else
-  echo "Nenhum stack de audio ativo"
+  echo -e "${YELLOW}Nenhum stack de áudio ativo${NC}"
 fi
 
 echo
-echo "8. Garantindo logs persistentes..."
+echo -e "${YELLOW}10. Garantindo logs persistentes...${NC}"
 mkdir -p /var/log/journal
 systemctl restart systemd-journald
 
 echo
-echo "== Correcao concluida =="
-echo "Reinicie o sistema se problemas persistirem."
+echo -e "${YELLOW}11. Verificando integridade do sistema de arquivos...${NC}"
+touch /forcefsck
 
+echo
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN} Correção concluída${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo "Reinicie o sistema se os problemas persistirem."
