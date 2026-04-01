@@ -1,86 +1,105 @@
-# Guia: Criando e Executando Scripts Linux Customizados
+# Guia Prático: Criando e Executando Scripts Linux Customizados
 
-Este guia explica como criar, organizar e executar scripts personalizados no Linux de forma simples e segura.
+Este guia ensina como criar, organizar e executar scripts personalizados no Linux de forma simples, segura e reutilizável, separando scripts por distribuição.
 
 ---
 
-## 1. Criar a pasta de scripts
-Primeiro, crie uma pasta dedicada para seus scripts no diretório pessoal.  
-Isso mantém tudo organizado e evita bagunça no sistema.
+## 1. Estrutura de pastas por distro
 
-```bash
-mkdir -p ~/scripts
+Organize seus scripts em pastas por distribuição para manter tudo limpo:
+
+```
+~/scripts/
+├── maintenance/
+│   ├── fedora/
+│   │   └── system-update.sh
+│   └── ubuntu/
+│       └── system-update.sh
 ```
 
-- -p: garante que a pasta seja criada mesmo que o caminho não exista.
-- ~/scripts: local comum e recomendado para scripts pessoais.
+* `maintenance/`: categoria de scripts de manutenção.
+* `fedora/` e `ubuntu/`: scripts específicos para cada distro.
+* Cada script deve ser nomeado de forma clara.
+
+Crie as pastas:
+
+```bash
+mkdir -p ~/scripts/maintenance/fedora
+mkdir -p ~/scripts/maintenance/ubuntu
+```
+
 ---
 
-## 2.Criar um novo script
-Crie o arquivo do script em formato .sh utilizando o editor de texto a sua escolha. No exemplo abaixo, criaremos um script chamado system-update.sh e editado via Nano:
+## 2. Criar um novo script
+
+Crie o arquivo `.sh` dentro da pasta correspondente à distro. Exemplo com Fedora:
 
 ```bash
-nano ~/scripts/system-update.sh
+nano ~/scripts/maintenance/fedora/system-update.sh
 ```
 
-Dentro do arquivo copie e cole o código do script. Exemplo abaixo:
+Exemplo de conteúdo:
 
 ```bash
 #!/bin/bash
 
-echo "...Atualizando o sistema..."
-sudo apt update && sudo apt upgrade -y
-echo "...Limpando o cache...."
-sudo apt autoremove -y
-echo "...Atualização finalizada..."
+echo "...Atualizando o sistema Fedora..."
+sudo dnf update -y
+sudo dnf autoremove -y
+echo "...Atualização finalizada!"
 ```
----
 
-## 3.Tornar o script executável
-Por padrão, arquivos .sh não são executáveis, é necessário alterar as permissões. Abaixo o comando para liberar as permissões:
-
-```bash
-sudo chmod +x ~/scripts/system-update.sh
-```
-Isso permite executar o script .sh dentro da pasta scripts.
+Para Ubuntu, ajuste os comandos (`apt update && apt upgrade -y`).
 
 ---
 
-## 4.Execturar o script
-Para rodar o script, basta executar o comando:
+## 3. Tornar o script executável
 
 ```bash
-~/scripts/system-update.sh
+chmod +x ~/scripts/maintenance/fedora/system-update.sh
+chmod +x ~/scripts/maintenance/ubuntu/system-update.sh
 ```
 
-Ou, se estiver dentro da pasta scripts:
+---
+
+## 4. Executar o script
+
+Dentro da pasta do script:
 
 ```bash
+cd ~/scripts/maintenance/fedora
 ./system-update.sh
 ```
 
+Ou com caminho completo:
+
+```bash
+~/scripts/maintenance/fedora/system-update.sh
+```
+
 ---
 
-## 5.(Opcional) - Tornar scripts globais
-Se quiser rodar seus scripts de qualquer lugar do terminal, adicione a pasta ~/scripts ao PATH do sistema.
+## 5. (Opcional) Tornar scripts globais
+
+Adicione o diretório base ao PATH:
 
 ```bash
 nano ~/.bashrc
 ```
 
-Adicione ao final do arquivo:
+Adicione:
 
 ```bash
-export PATH="$HOME/scripts:$PATH"
+export PATH="$HOME/scripts/maintenance/fedora:$HOME/scripts/maintenance/ubuntu:$PATH"
 ```
 
-Depois recarregue:
+Recarregue:
 
 ```bash
 source ~/.bashrc
 ```
 
-Agora o script pode ser executado apenas com:
+Agora é possível executar:
 
 ```bash
 system-update.sh
@@ -88,13 +107,10 @@ system-update.sh
 
 ---
 
-## Dicas
+## 6. Boas práticas
 
-Dicas práticas:
-- Sempre use #!/bin/bash no inicio do script.
-- Nomeie scripts de forma clara como no exemplo utilizado.
-- Crie comentários em scripts longos e detalhados.
-- Teste sempre antes de automatizer e incluir no PATH.
-
-
-
+* Sempre use `#!/bin/bash` no início do script.
+* Nomeie scripts de forma clara e objetiva.
+* Separe scripts por distro para evitar erros.
+* Comente scripts longos e teste antes de automatizar.
+* Adicione novas categorias de scripts criando novas pastas dentro de `~/scripts/`.
