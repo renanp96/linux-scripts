@@ -82,12 +82,8 @@ fi
 # 6. Verificar se reboot é necessário
 # =====================================
 section "Verificando necessidade de reinicialização"
-NEEDS_REBOOT=$(dnf needs-restarting -r 2>/dev/null; echo $?)
-if [ "$NEEDS_REBOOT" -eq 1 ]; then
-    log_warn "Reinicialização do sistema é recomendada"
-else
+if dnf needs-restarting -r &>/dev/null; then
     log_success "Nenhuma reinicialização necessária"
+else
+    log_warn "Reinicialização do sistema é recomendada"
 fi
-
-echo
-log_success "Sistema atualizado com sucesso"
