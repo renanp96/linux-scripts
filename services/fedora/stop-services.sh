@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Script para encerrar serviços: Docker, MariaDB, PostgreSQL, Jenkins, MongoDB, RabbitMQ e Minikube
 # Autor: Renan P Andrade
 # Data: $(date +%Y-%m-%d)
@@ -25,13 +24,11 @@ check_service() {
 stop_service() {
     local service_name=$1
     local display_name=$2
-    
+
     echo -n "Verificando $display_name... "
-    
     if check_service "$service_name"; then
         echo -e "${YELLOW}rodando${NC}"
         echo -n "Encerrando $display_name... "
-        
         if sudo systemctl stop "$service_name"; then
             echo -e "${GREEN}✓ Encerrado com sucesso${NC}"
         else
@@ -88,6 +85,7 @@ fi
 # Encerrar Docker (por último)
 echo "--- Docker ---"
 stop_service "docker" "Docker"
+stop_service "docker.socket" "Docker Socket"
 
 # Encerrar Minikube
 echo "--- Minikube (Kubernetes) ---"
@@ -114,13 +112,12 @@ echo "=========================================="
 echo ""
 
 # Mostrar status final
-services=("jenkins" "postgresql" "mariadb" "mongod" "rabbitmq-server" "docker")
-display_names=("Jenkins" "PostgreSQL" "MariaDB" "MongoDB" "RabbitMQ" "Docker")
+services=("jenkins" "postgresql" "mariadb" "mongod" "rabbitmq-server" "docker" "docker.socket")
+display_names=("Jenkins" "PostgreSQL" "MariaDB" "MongoDB" "RabbitMQ" "Docker" "Docker Socket")
 
 for i in "${!services[@]}"; do
     service="${services[$i]}"
     display="${display_names[$i]}"
-    
     echo -n "$display: "
     if check_service "$service" 2>/dev/null; then
         echo -e "${RED}Rodando${NC}"
